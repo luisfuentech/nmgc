@@ -4,7 +4,7 @@ function cli(...args) {
   const path = require("path");
 
   const script = spawn("sh", [
-    `${path.join(__dirname, "scripts", "nodeModuleHandler.sh")}`,
+    `${path.join(__dirname, "scripts", "main.sh")}`,
     ...args
   ]);
 

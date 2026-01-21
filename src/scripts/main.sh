@@ -11,6 +11,8 @@ NPM_ERROR=false
 
 # Node files and directories
 PACKAGE_LOCK="package-lock.json"
+YARN_LOCK="yarn.lock"
+PNPM_LOCK="pnpm-lock.yaml"
 PACKAGE="package.json"
 NODE_MODULES="node_modules"
 
@@ -75,6 +77,24 @@ function removeNpmModules() {
         checkError
 
         printWithColor "$(date +"%Y-%m-%d %T") '$PACKAGE_LOCK' file removed! ✅\n" "green" && sleep 0.5
+    fi
+
+    if [[ -f $YARN_LOCK ]]; then
+        ACTION_FLAG=true
+        printWithColor "$(date +"%Y-%m-%d %T") Removing '$YARN_LOCK' file...⚙️\n" "green" && sleep 0.5
+        rm $YARN_LOCK || ERROR=true
+        checkError
+
+        printWithColor "$(date +"%Y-%m-%d %T") '$YARN_LOCK' file removed! ✅\n" "green" && sleep 0.5
+    fi
+
+    if [[ -f $PNPM_LOCK ]]; then
+        ACTION_FLAG=true
+        printWithColor "$(date +"%Y-%m-%d %T") Removing '$PNPM_LOCK' file...⚙️\n" "green" && sleep 0.5
+        rm $PNPM_LOCK || ERROR=true
+        checkError
+
+        printWithColor "$(date +"%Y-%m-%d %T") '$PNPM_LOCK' file removed! ✅\n" "green" && sleep 0.5
     fi
 
     if [[ -d $NODE_MODULES ]]; then
