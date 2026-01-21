@@ -1,6 +1,6 @@
 # Node Modules Garbage Cleaner
 
-This module allows you to remove `package-lock.json` and `node_modules` from your project. Also you has a clean installation of your npm packages.
+This module allows you to remove lock files (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`) and `node_modules` from your project. It also provides a clean installation of your dependencies using npm, yarn, or pnpm.
 
 <a href="https://nodei.co/npm/nmgc">
   <img src="https://nodei.co/npm/nmgc.png?downloads=true">
@@ -21,13 +21,13 @@ The minimum supported version of Node.js is v6.
 ## Installation
 
 ```bash
-$ npm i -g nmgc
+npm i -g nmgc
 ```
 
 Or use with `npx`
 
 ```bash
-$ npx nmgc <COMMAND> [OPTIONS]
+npx nmgc <COMMAND> [OPTIONS]
 ```
 
 # Commands
@@ -38,11 +38,38 @@ USAGE:
 
 COMMAND
     h, help     show general help
-    r, remove   remove package-lock and node_modules
+    r, remove   remove lock files (package-lock.json, yarn.lock, pnpm-lock.yaml) and node_modules
     i, install  clean dependencies and install them from package.json
 
 OPTIONS:
-    -f, --force  force the npm installation
+    -f, --force  force the installation
+    --npm        use npm package manager
+    --yarn       use yarn package manager
+    --pnpm       use pnpm package manager
+
+NOTE: If no package manager is specified, it will auto-detect based on lock files.
+```
+
+## Examples
+
+```bash
+# Remove lock files and node_modules
+$ nmgc remove
+
+# Clean install with auto-detection
+$ nmgc install
+
+# Clean install using yarn
+$ nmgc install --yarn
+
+# Clean install using pnpm
+$ nmgc install --pnpm
+
+# Install a specific package with npm
+$ nmgc install express
+
+# Install a specific package with yarn
+$ nmgc install lodash --yarn
 ```
 
 # License

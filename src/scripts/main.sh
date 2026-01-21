@@ -82,7 +82,8 @@ function detectPackageManager() {
     elif [[ -f $PACKAGE_LOCK ]]; then
         PACKAGE_MANAGER="npm"
     else
-        PACKAGE_MANAGER="npm"  # default to npm
+        printWithColor "[Error]: No lock file found and no package manager specified. Please use --npm, --yarn, or --pnpm 💥\n" "red"
+        exit 1
     fi
 }
 
