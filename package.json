@@ -1,6 +1,6 @@
 {
   "name": "nmgc",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Remove the node_module and reinstall your npm packages in an easy way",
   "main": "index.js",
   "bin": {
