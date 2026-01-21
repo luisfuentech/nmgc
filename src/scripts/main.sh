@@ -30,12 +30,18 @@ COMMAND
     i, install  clean dependencies and install them from package.json  
 
 OPTIONS:
-    -f, --force  force the npm installation
+    -f, --force  force the installation
+    --npm        use npm package manager
+    --yarn       use yarn package manager
+    --pnpm       use pnpm package manager
+
+NOTE: If no package manager is specified, it will auto-detect based on lock files.
 "
 
 # Flags
 ACTION_FLAG=false
 IS_INSTALL_OPTIONAL=false
+PACKAGE_MANAGER=""
 
 function printWithColor() {
     TEXT="$1"
@@ -64,7 +70,23 @@ function checkError() {
     fi
 }
 
-function removeNpmModules() {
+function detectPackageManager() {
+    if [[ -n $PACKAGE_MANAGER ]]; then
+        return
+    fi
+    
+    if [[ -f $PNPM_LOCK ]]; then
+        PACKAGE_MANAGER="pnpm"
+    elif [[ -f $YARN_LOCK ]]; then
+        PACKAGE_MANAGER="yarn"
+    elif [[ -f $PACKAGE_LOCK ]]; then
+        PACKAGE_MANAGER="npm"
+    else
+        PACKAGE_MANAGER="npm"  # default to npm
+    fi
+}
+
+function removeDependencies() {
     printWithColor "$(date +"%Y-%m-%d %T") Init NPM dependencies removing...⏳\n" "cyan" && sleep 0.5
     printWithColor "$(date +"%Y-%m-%d %T") Moving to $PWD... 🚀\n" "green" && sleep 0.5
     cd $PWD || ERROR=true
@@ -109,25 +131,45 @@ function removeNpmModules() {
     if [[ $ACTION_FLAG == false ]]; then
         printWithColor "$(date +"%Y-%m-%d %T") There's nothing to remove! 🗑\n\n" "cyan" && sleep 0.5
     else
-        printWithColor "$(date +"%Y-%m-%d %T") NPM dependencies were removed! ✅\n\n" "cyan" && sleep 0.5
+        printWithColor "$(date +"%Y-%m-%d %T") Dependencies were removed! ✅\n\n" "cyan" && sleep 0.5
     fi
 
 }
 
-function installNpmModules() {
-    printWithColor "$(date +"%Y-%m-%d %T") Init NPM dependencies installing...⏳\n" "cyan" && sleep 0.5
+function installDependencies() {
+    detectPackageManager
+    
+    printWithColor "$(date +"%Y-%m-%d %T") Init dependencies installing with $PACKAGE_MANAGER...⏳\n" "cyan" && sleep 0.5
     if [[ -f $PACKAGE ]]; then
-        printWithColor "$(date +"%Y-%m-%d %T") Installing NPM dependencies...⚙️\n" "green" && sleep 0.5
+        printWithColor "$(date +"%Y-%m-%d %T") Installing dependencies with $PACKAGE_MANAGER...⚙️\n" "green" && sleep 0.5
 
-        if [[ $IS_INSTALL_OPTIONAL == true ]]; then
-            npm i $OPTION --save || NPM_ERROR=true
-        else
-            npm i --save || NPM_ERROR=true
-        fi
+        case $PACKAGE_MANAGER in
+            npm)
+                if [[ $IS_INSTALL_OPTIONAL == true ]]; then
+                    npm i $OPTION --save || NPM_ERROR=true
+                else
+                    npm i --save || NPM_ERROR=true
+                fi
+                ;;
+            yarn)
+                if [[ $IS_INSTALL_OPTIONAL == true ]]; then
+                    yarn add $OPTION || NPM_ERROR=true
+                else
+                    yarn install || NPM_ERROR=true
+                fi
+                ;;
+            pnpm)
+                if [[ $IS_INSTALL_OPTIONAL == true ]]; then
+                    pnpm add $OPTION || NPM_ERROR=true
+                else
+                    pnpm install || NPM_ERROR=true
+                fi
+                ;;
+        esac
 
         checkError
 
-        printWithColor "$(date +"%Y-%m-%d %T") NPM dependencies installed! ✅\n" "cyan" && sleep 0.5
+        printWithColor "$(date +"%Y-%m-%d %T") Dependencies installed with $PACKAGE_MANAGER! ✅\n" "cyan" && sleep 0.5
     else
         printWithColor "$(date +"%Y-%m-%d %T") This directory doesn't have '$PACKAGE' file\n" "cyan" && sleep 0.5
     fi
@@ -144,17 +186,24 @@ if [[ $COMMAND == "help" ]] || [[ $COMMAND == "h" ]]; then
     exit 1
 fi
 
-if [[ -n $OPTION ]]; then
+# Parse package manager options
+if [[ $OPTION == "--npm" ]]; then
+    PACKAGE_MANAGER="npm"
+elif [[ $OPTION == "--yarn" ]]; then
+    PACKAGE_MANAGER="yarn"
+elif [[ $OPTION == "--pnpm" ]]; then
+    PACKAGE_MANAGER="pnpm"
+elif [[ -n $OPTION ]] && [[ $OPTION != -* ]]; then
     IS_INSTALL_OPTIONAL=true
 fi
 
 if [[ $COMMAND == "remove" ]] || [[ $COMMAND == "r" ]]; then
-    removeNpmModules
+    removeDependencies
 elif
     [[ $COMMAND == "install" ]] || [[ $COMMAND == "i" ]]
 then
-    removeNpmModules
-    installNpmModules
+    removeDependencies
+    installDependencies
 else
     printWithColor "The command '$COMMAND' isn't correct ❌\n" "red"
     printWithColor "$COMMAND_MAN\n" "cyan"
